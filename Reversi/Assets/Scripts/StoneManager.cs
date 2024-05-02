@@ -9,7 +9,7 @@ public class StoneManager : MonoBehaviour
     Color white = new Color(1, 1, 1, 1);
     Color black = new Color(0, 0, 0, 1);
 
-    private void Start()
+    private void Awake()
     {
         sr = GetComponent<SpriteRenderer>();
     }

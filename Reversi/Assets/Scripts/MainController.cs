@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MainController : MonoBehaviour
 {
@@ -12,8 +13,8 @@ public class MainController : MonoBehaviour
 
     const int boardX = 8; // 横マス
     const int boardY = 8; // 縦マス
-    int whiteScore; // 白の枚数
-    int blackScore; // 黒の枚数
+    int blackScore = 0;
+    int whiteScore = 0;
 
     GameObject[,] stones = new GameObject[boardY, boardX];
     StoneManager[,] stoneManagers = new StoneManager[boardY, boardX];
@@ -21,9 +22,31 @@ public class MainController : MonoBehaviour
 
     bool isFirstPlayer = true; // 先手かどうか
 
+    int passNum = 0; // パスの回数
+
     // Ray
     const float maxDistance = 10;
     LayerMask layerMask;
+
+    bool isGameEnd = false;
+
+    // UI
+    [SerializeField] Text whiteScoreText;
+    [SerializeField] Text blackScoreText;
+    [SerializeField] Text pass;
+    [SerializeField] Text gameEnd;
+    [SerializeField] Text win;
+
+    // コマが置けるかどうかを表示する
+    [SerializeField] GameObject canPutObj;
+    [SerializeField] Transform canPutParent;
+    SpriteRenderer[,] canPut = new SpriteRenderer[boardY, boardX];
+
+    // タイマー
+    [SerializeField] Timer blackTimer;
+    [SerializeField] Timer whiteTimer;
+    Timer playerTimer;
+    Timer lastPlayerTimer;
 
     void Start()
     {
@@ -52,22 +75,70 @@ public class MainController : MonoBehaviour
         stoneState[4, 3] = eStoneState.BLACK;
         stoneState[4, 4] = eStoneState.WHITE;
 
-        whiteScore = 2;
-        blackScore = 2;
+        for (int y = 0; y < boardY; y++)
+        {
+            for (int x = 0; x < boardX; x++)
+            {
+                // 生成
+                var c = Instantiate(canPutObj, canPutParent);
+
+                // 位置変更
+                c.transform.localPosition = new Vector3(x, y, 0);
+
+                // 配列に情報を入れる
+                canPut[x, y] = c.GetComponent<SpriteRenderer>();
+                canPut[x, y].enabled = false;
+            }
+        }
+
+        blackTimer.gameObject.SetActive(false);
+        whiteTimer.gameObject.SetActive(false);
+
+        Timer();
     }
 
     void Update()
     {
-        PutStone();
-
-        // コマの描画を更新
-        for(int y = 0; y < boardY; y++)
+        if(!isGameEnd)
         {
-            for(int x = 0; x < boardX; x++)
+            PutStone();
+
+            // コマの描画を更新
+            for (int y = 0; y < boardY; y++)
             {
-                stoneManagers[x, y].SetState(stoneState[x, y]);
+                for (int x = 0; x < boardX; x++)
+                {
+                    stoneManagers[x, y].SetState(stoneState[x, y]);
+                }
+            }
+
+            CountAmount();
+            GameEndCheck();
+        }
+    }
+
+    /// <summary>
+    /// 枚数を数える
+    /// </summary>
+    void CountAmount()
+    {
+        int bScore = 0;
+        int wScore = 0;
+
+        for (int y = 0; y < boardY; y++)
+        {
+            for (int x = 0; x < boardX; x++)
+            {
+                if(stoneState[x, y] == eStoneState.BLACK) bScore++;
+                if(stoneState[x, y] == eStoneState.WHITE) wScore++;
             }
         }
+
+        blackScore = bScore;
+        whiteScore = wScore;
+
+        whiteScoreText.text = wScore.ToString() + "枚";
+        blackScoreText.text = bScore.ToString() + "枚";
     }
 
     /// <summary>
@@ -87,22 +158,34 @@ public class MainController : MonoBehaviour
                 // 何も置かれていない場合
                 if (stoneState[x, y] == eStoneState.EMPTY)
                 {
-                    // ひっくり返せるコマがあったらbreak
+                    // ひっくり返せるコマがあったら
                     if (Turn(x, y, color, true))
                     {
                         isTurnable = true;
-                        break;
+                        canPut[x, y].enabled = true; // 置ける場所に画像を表示して強調
                     }
                 }
             }
 
-            if(isTurnable) break;
+            if(isTurnable)
+            {
+                passNum = 0;
+            }
         }
 
         if(!isTurnable)
         {
-            Debug.Log("pass");
             isFirstPlayer = !isFirstPlayer; // 手番交代
+            passNum++;
+
+            StartCoroutine(Pass());
+
+            // パスが続いたら
+            if(passNum >= 2)
+            {
+                // ゲーム終了
+                isGameEnd = true;
+            }
         }
 
         if (Input.GetMouseButtonDown(0) && isTurnable)
@@ -121,6 +204,10 @@ public class MainController : MonoBehaviour
                 {
                     stoneState[x, y] = isFirstPlayer ? eStoneState.BLACK : eStoneState.WHITE;
                     isFirstPlayer = !isFirstPlayer; // 手番交代
+
+                    CanPutDispInitialize();
+
+                    Timer();
                 }
             }
         }
@@ -233,5 +320,73 @@ public class MainController : MonoBehaviour
         isTurnable = true;
 
         return isTurnable;
+    }
+
+    /// <summary>
+    /// タイマー管理
+    /// </summary>
+    void Timer()
+    {
+        playerTimer = isFirstPlayer ? blackTimer : whiteTimer;
+        playerTimer.gameObject.SetActive(true);
+
+        lastPlayerTimer = isFirstPlayer ? whiteTimer : blackTimer;
+        lastPlayerTimer.gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// コマが置けるかどうかの表示を初期化
+    /// </summary>
+    void CanPutDispInitialize()
+    {
+        for (int y = 0; y < boardY; y++)
+        {
+            for (int x = 0; x < boardX; x++)
+            {
+                canPut[x, y].enabled = false;
+            }
+        }
+    }
+
+    /// <summary>
+    /// ゲーム終了したか確認　演出
+    /// </summary>
+    void GameEndCheck()
+    {
+        if(isGameEnd)
+        {
+            StartCoroutine(Result());
+
+            blackTimer.gameObject.SetActive(false);
+            whiteTimer.gameObject.SetActive(false);
+        }
+    }
+
+    IEnumerator Result()
+    {
+        gameEnd.enabled = true;
+        pass.enabled = false;
+
+        yield return new WaitForSeconds(1.0f);
+
+        gameEnd.enabled = false;
+
+        if (blackScore > whiteScore) win.text = "黒の勝ち";
+        if (blackScore < whiteScore) win.text = "白の勝ち";
+        if (blackScore == whiteScore) win.text = "引き分け";
+    }
+
+    /// <summary>
+    /// パス演出
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator Pass()
+    {
+        if(!isGameEnd)
+        {
+            pass.enabled = true;
+            yield return new WaitForSeconds(1.0f);
+            pass.enabled = false;
+        }
     }
 }
