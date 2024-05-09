@@ -756,6 +756,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc5a793454b97064797559bdbd498b91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainController: {fileID: 1734270406}
+  timeLimit_sec: 60
 --- !u!1 &183631226
 GameObject:
   m_ObjectHideFlags: 0
@@ -4444,6 +4446,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc5a793454b97064797559bdbd498b91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainController: {fileID: 1734270406}
+  timeLimit_sec: 60
 --- !u!1 &1576407117
 GameObject:
   m_ObjectHideFlags: 0
@@ -5033,6 +5037,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1734270407}
   - component: {fileID: 1734270406}
+  - component: {fileID: 1734270408}
   m_Layer: 0
   m_Name: Main
   m_TagString: Untagged
@@ -5052,6 +5057,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95c0bb1c5a2a089458b6c38c3cf977a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sceneChange: {fileID: 1734270408}
   mainCamera: {fileID: 1320292988}
   stoneObj: {fileID: 8427292784183649857, guid: 97a50df95942a094fbfc04718bcf93d7, type: 3}
   stoneParent: {fileID: 341355700}
@@ -5079,6 +5085,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1734270408
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1734270405}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12f966f891b5b8044bcb77f8c7355aa6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1763680756
 GameObject:
   m_ObjectHideFlags: 0

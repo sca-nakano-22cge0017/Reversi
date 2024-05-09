@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class MainController : MonoBehaviour
 {
+    [SerializeField] SceneChange sceneChange;
     [SerializeField] Camera mainCamera;
 
     [SerializeField] GameObject stoneObj;
@@ -29,6 +30,7 @@ public class MainController : MonoBehaviour
     LayerMask layerMask;
 
     bool isGameEnd = false;
+    public bool IsGameEnd { get { return isGameEnd; } }
 
     // UI
     [SerializeField] Text whiteScoreText;
@@ -47,6 +49,21 @@ public class MainController : MonoBehaviour
     [SerializeField] Timer whiteTimer;
     Timer playerTimer;
     Timer lastPlayerTimer;
+
+    /// <summary>
+    /// ひっくり返せる石の座標データ
+    /// </summary>
+    class TurnableStone
+    {
+        public int posX;
+        public int posY;
+
+        public TurnableStone(int x, int y)
+        {
+            posX = x;
+            posY = y;
+        }
+    }
 
     void Start()
     {
@@ -114,6 +131,23 @@ public class MainController : MonoBehaviour
 
             CountAmount();
             GameEndCheck();
+
+            // 制限時間が来たら
+            if (playerTimer.TimeUp)
+            {
+                CanPutDispInitialize();
+                isFirstPlayer = !isFirstPlayer; // 手番交代
+                StartCoroutine(Pass());
+            }
+        }
+
+        else
+        {
+            // タイマー非表示
+            blackTimer.gameObject.SetActive(false);
+            whiteTimer.gameObject.SetActive(false);
+
+            sceneChange.Change(3.0f, "Title");
         }
     }
 
@@ -216,21 +250,6 @@ public class MainController : MonoBehaviour
     int[] turnCheckX = new int[] {-1, 0, 1, -1, 1, -1, 0, 1};
     int[] turnCheckY = new int[] {-1, -1, -1, 0, 0, 1, 1, 1};
     const int dirNum = 8; // 検索方向数
-
-    /// <summary>
-    /// ひっくり返せる石の座標データ
-    /// </summary>
-    class TurnableStone
-    {
-        public int posX;
-        public int posY;
-
-        public TurnableStone(int x, int y)
-        {
-            posX = x;
-            posY = y;
-        }
-    }
 
     /// <summary>
     /// ひっくり返す処理
@@ -387,6 +406,7 @@ public class MainController : MonoBehaviour
             pass.enabled = true;
             yield return new WaitForSeconds(1.0f);
             pass.enabled = false;
+            Timer();
         }
     }
 }

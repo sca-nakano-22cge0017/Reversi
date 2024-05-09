@@ -5,11 +5,14 @@ using UnityEngine.UI;
 
 public class Timer : MonoBehaviour
 {
+    [SerializeField] MainController mainController;
+
     Text timerText;
-    float timeLimit_sec = 60;
+    [SerializeField] float timeLimit_sec = 60;
     float time = 0;
 
     bool timeUp = false;
+    public bool TimeUp { get { return timeUp;} }
 
     private void Awake()
     {
@@ -25,7 +28,7 @@ public class Timer : MonoBehaviour
 
     void Update()
     {
-        if(!timeUp)
+        if(!timeUp && !mainController.IsGameEnd)
         {
             time -= Time.deltaTime;
             timerText.text = ((int)time / 60).ToString("d2") + ":" + ((int)time % 60).ToString("d2");
