@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// コマの色変更
+/// </summary>
 public class StoneManager : MonoBehaviour
 {
     SpriteRenderer sr;

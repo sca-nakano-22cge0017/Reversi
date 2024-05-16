@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// ƒV[ƒ“‘JˆÚ
+/// </summary>
 public class SceneChange : MonoBehaviour
 {
     public void GameStart()

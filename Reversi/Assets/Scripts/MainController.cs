@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// î’ñ êßå‰
+/// </summary>
 public class MainController : MonoBehaviour
 {
     [SerializeField] SceneChange sceneChange;
